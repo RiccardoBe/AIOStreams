@@ -4,13 +4,13 @@ services:
     container_name: aiostreams
     restart: unless-stopped
     ports:
-      - 3000:3000
+      - 3001:3001
     env_file:
       - .env
     volumes:
       - ./data:/app/data
     healthcheck:
-      test: wget -qO- http://localhost:3000/api/v1/status
+      test: wget -qO- http://localhost:3001/api/v1/status
       interval: 1m
       timeout: 10s
       retries: 5

@@ -2,6 +2,9 @@ FROM node:22-alpine AS builder
 
 WORKDIR /build
 
+# Install build dependencies for native modules
+RUN apk add --no-cache python3 make g++ py3-pip
+
 # Copy LICENSE file.
 COPY LICENSE ./
 
@@ -21,8 +24,6 @@ COPY packages/server ./packages/server
 COPY packages/core ./packages/core
 COPY packages/frontend ./packages/frontend
 COPY scripts ./scripts
-COPY resources ./resources
-
 
 # Build the project.
 RUN npm run build
@@ -33,6 +34,12 @@ RUN npm --workspaces prune --omit=dev
 FROM node:22-alpine AS final
 
 WORKDIR /app
+
+# Install wget for healthcheck
+RUN apk add --no-cache wget
+
+# Create data directory
+RUN mkdir -p /app/data
 
 # Copy the built files from the builder.
 # The package.json files must be copied as well for NPM workspace symlinks between local packages to work.
@@ -45,8 +52,6 @@ COPY --from=builder /build/packages/server/package.*json ./packages/server/
 COPY --from=builder /build/packages/core/dist ./packages/core/dist
 COPY --from=builder /build/packages/frontend/out ./packages/frontend/out
 COPY --from=builder /build/packages/server/dist ./packages/server/dist
-
-COPY --from=builder /build/resources ./resources
 
 COPY --from=builder /build/node_modules ./node_modules
 
