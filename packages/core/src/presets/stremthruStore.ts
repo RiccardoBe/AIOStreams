@@ -79,8 +79,9 @@ export class StremthruStorePreset extends Preset {
       },
       {
         id: 'webDl',
-        name: 'Web DL',
-        description: 'Enable web DL',
+        name: 'Web Downloads',
+        description:
+          'Include downloads from web hosters (e.g. Mega, Zippyshare) in results',
         type: 'boolean',
       },
       {
@@ -155,8 +156,11 @@ export class StremthruStorePreset extends Preset {
       library: true,
       resources: options.resources || this.METADATA.SUPPORTED_RESOURCES,
       timeout: options.timeout || this.METADATA.TIMEOUT,
-      presetType: this.METADATA.ID,
-      presetInstanceId: '',
+      preset: {
+        id: '',
+        type: this.METADATA.ID,
+        options: options,
+      },
       headers: {
         'User-Agent': this.METADATA.USER_AGENT,
       },

@@ -1,8 +1,30 @@
-import { Addon, Option, UserData } from '../db';
+import { Addon, Option, ParsedStream, Stream, UserData } from '../db';
 import { Preset, baseOptions } from './preset';
 import { constants, Env, FULL_LANGUAGE_MAPPING } from '../utils';
+import { StreamParser } from '../parser';
+
+class TmdbCollectionsStreamParser extends StreamParser {
+  protected override getFilename(
+    stream: Stream,
+    currentParsedStream: ParsedStream
+  ): string | undefined {
+    return undefined;
+  }
+
+  protected override getMessage(
+    stream: Stream,
+    currentParsedStream: ParsedStream
+  ): string | undefined {
+    const message = stream.description?.match(/"([^"]*)"/);
+    return message ? message[1] : undefined;
+  }
+}
 
 export class TmdbCollectionsPreset extends Preset {
+  static override getParser() {
+    return TmdbCollectionsStreamParser;
+  }
+
   static override get METADATA() {
     const supportedResources = [
       constants.CATALOG_RESOURCE,
@@ -34,9 +56,9 @@ export class TmdbCollectionsPreset extends Preset {
       },
       {
         id: 'enableCollectionFromMovie',
-        name: 'Discover and open collection from movie details page',
+        name: 'Add Collection Stream',
         description:
-          'Adds a button to movies details page that links to its collection',
+          'Adds a stream link to movies that links to its collection page.',
         type: 'boolean',
         default: false,
         required: false,
@@ -114,8 +136,11 @@ export class TmdbCollectionsPreset extends Preset {
       library: false,
       resources: options.resources || this.METADATA.SUPPORTED_RESOURCES,
       timeout: options.timeout || this.METADATA.TIMEOUT,
-      presetType: this.METADATA.ID,
-      presetInstanceId: '',
+      preset: {
+        id: '',
+        type: this.METADATA.ID,
+        options: options,
+      },
       headers: {
         'User-Agent': this.METADATA.USER_AGENT,
       },
